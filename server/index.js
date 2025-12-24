@@ -9,8 +9,23 @@ connectDB();
 
 const app = express();
 
+const allowedOrigins = [
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://ai-book-virid-ten.vercel.app',
+    'https://ai-book-nook.vercel.app' // Fallback/Future proof
+];
+
 app.use(cors({
-    origin: ['http://localhost:8080', 'http://localhost:3000'],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log('Blocked by CORS:', origin);
+            callback(null, true); // Temporarily allow all for debugging if needed, or stick to strict: callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(express.json());
