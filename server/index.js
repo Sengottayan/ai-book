@@ -13,18 +13,25 @@ const allowedOrigins = [
     'http://localhost:8080',
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://ai-book-virid-ten.vercel.app',
-    'https://ai-book-nook.vercel.app' // Fallback/Future proof
 ];
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            console.log('Blocked by CORS:', origin);
-            callback(null, true); // Temporarily allow all for debugging if needed, or stick to strict: callback(new Error('Not allowed by CORS'));
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // Check if origin is in the allowed list
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         }
+
+        // Allow any Vercel deployment
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+
+        console.log('Blocked by CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true
 }));
