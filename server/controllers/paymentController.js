@@ -61,6 +61,8 @@ const verifyPayment = asyncHandler(async (req, res) => {
         .update(body.toString())
         .digest('hex');
 
+    console.log(`[Payment Verify] Expected: ${expectedSignature}, Received: ${razorpay_signature}`);
+
     if (expectedSignature === razorpay_signature) {
         const order = await Order.findById(orderId);
         if (order) {
@@ -73,12 +75,14 @@ const verifyPayment = asyncHandler(async (req, res) => {
                 email_address: ""
             };
             await order.save();
+            console.log(`[Payment Verify] Success for Order ${orderId}`);
             res.json({ message: "Payment Verified", verified: true });
         } else {
             res.status(404);
             throw new Error("Order not found");
         }
     } else {
+        console.error(`[Payment Verify] Signature Mismatch!`);
         res.status(400);
         throw new Error("Invalid signature");
     }
