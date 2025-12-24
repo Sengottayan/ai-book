@@ -11,15 +11,22 @@ import api from '@/lib/axios';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (password !== confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+
         setLoading(true);
 
         try {
-            await api.post('/api/users/forgotpassword', { email });
+            await api.post('/api/users/forgotpassword', { email, password });
             setSubmitted(true);
             toast.success('Password reset link sent to your email');
         } catch (error: any) {
@@ -52,10 +59,10 @@ const ForgotPassword = () => {
                         <>
                             <div className="text-center mb-8">
                                 <h1 className="font-serif text-2xl font-bold text-foreground mb-2">
-                                    Forgot Password?
+                                    Reset Password
                                 </h1>
                                 <p className="text-muted-foreground">
-                                    Enter your email address and we'll send you a link to reset your password.
+                                    Enter your email and new password to reset it directly.
                                 </p>
                             </div>
 
@@ -76,8 +83,33 @@ const ForgotPassword = () => {
                                     </div>
                                 </div>
 
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">New Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="New Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        minLength={6}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                    <Input
+                                        id="confirmPassword"
+                                        type="password"
+                                        placeholder="Confirm New Password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
                                 <Button variant="gold" size="lg" className="w-full gap-2" disabled={loading}>
-                                    {loading ? 'Sending...' : 'Send Reset Link'}
+                                    {loading ? 'Updating...' : 'Update Password'}
                                     {!loading && <ArrowRight className="h-5 w-5" />}
                                 </Button>
                             </form>
@@ -85,21 +117,19 @@ const ForgotPassword = () => {
                     ) : (
                         <div className="text-center space-y-6">
                             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                                <Mail className="h-8 w-8" />
+                                <BookOpen className="h-8 w-8" />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold font-serif mb-2">Check your email</h2>
+                                <h2 className="text-2xl font-bold font-serif mb-2">Password Updated</h2>
                                 <p className="text-muted-foreground">
-                                    We've sent a password reset link to <strong>{email}</strong>
+                                    Your password has been successfully updated.
                                 </p>
                             </div>
-                            <Button
-                                variant="outline"
-                                className="w-full"
-                                onClick={() => setSubmitted(false)}
-                            >
-                                Try different email
-                            </Button>
+                            <Link to="/login">
+                                <Button className="w-full">
+                                    Login Now
+                                </Button>
+                            </Link>
                         </div>
                     )}
 

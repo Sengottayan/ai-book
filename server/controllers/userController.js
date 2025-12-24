@@ -177,42 +177,19 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
 // @route   POST /api/users/forgotpassword
 // @access  Public
 const forgotPassword = asyncHandler(async (req, res) => {
-    const user = await User.findOne({ email: req.body.email });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
     if (!user) {
         res.status(404);
         throw new Error('User not found');
     }
 
-    const resetToken = user.getResetPasswordToken();
-
+    // Direct password update as requested (SECURITY WARNING: This allows anyone to reset if they know the email)
+    user.password = password;
     await user.save();
 
-    const resetUrl = `http://localhost:8080/resetpassword/${resetToken}`;
-
-    const message = `
-        <h1>You have requested a password reset</h1>
-        <p>Please go to this link to reset your password:</p>
-        <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
-    `;
-
-    try {
-        await sendEmail({
-            to: user.email,
-            subject: 'Password Reset Request',
-            html: message,
-        });
-
-        res.status(200).json({ success: true, data: 'Email Sent' });
-    } catch (error) {
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-
-        await user.save();
-
-        res.status(500);
-        throw new Error('Email could not be sent');
-    }
+    res.status(200).json({ success: true, data: 'Password updated successfully' });
 });
 
 // @desc    Reset Password
