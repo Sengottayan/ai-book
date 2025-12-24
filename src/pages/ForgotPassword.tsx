@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:5000/api/users/forgotpassword', { email });
+            await api.post('/api/users/forgotpassword', { email });
             setSubmitted(true);
             toast.success('Password reset link sent to your email');
         } catch (error: any) {

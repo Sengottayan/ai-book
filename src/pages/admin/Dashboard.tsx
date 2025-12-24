@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { Package, ShoppingBag, Users, BookOpen, DollarSign, MessageSquare } from 'lucide-react';
@@ -24,7 +24,7 @@ const Dashboard = () => {
                 const config = {
                     headers: { Authorization: `Bearer ${user?.token}` },
                 };
-                const { data } = await axios.get('http://localhost:5000/api/orders/stats', config);
+                const { data } = await api.get('/api/orders/stats', config);
                 setStats(data);
             } catch (error) {
                 toast.error('Failed to fetch stats');

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { useAuth } from '@/context/AuthContext';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ const Invoice = () => {
                         Authorization: `Bearer ${user?.token}`,
                     },
                 };
-                const { data } = await axios.get(`http://localhost:5000/api/orders/${id}`, config);
+                const { data } = await api.get(`/api/orders/${id}`, config);
                 setOrder(data);
             } catch (error) {
                 console.error('Error fetching order:', error);

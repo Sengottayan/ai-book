@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 
 const ResetPassword = () => {
     const [password, setPassword] = useState('');
@@ -29,7 +29,7 @@ const ResetPassword = () => {
         setLoading(true);
 
         try {
-            await axios.put(`http://localhost:5000/api/users/resetpassword/${token}`, {
+            await api.put(`/api/users/resetpassword/${token}`, {
                 password,
             });
             toast.success('Password reset successful! Please login.');
