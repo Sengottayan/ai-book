@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Edit, Trash2, Plus } from 'lucide-react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { toast } from 'sonner';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,12 @@ const ProductList = () => {
 
     const fetchBooks = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/books');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user?.token}`,
+                },
+            };
+            const { data } = await api.get('/api/books', config);
             setBooks(data);
         } catch (error) {
             toast.error('Failed to fetch books');
@@ -49,7 +54,7 @@ const ProductList = () => {
                         Authorization: `Bearer ${user?.token}`,
                     },
                 };
-                await axios.delete(`http://localhost:5000/api/books/${id}`, config);
+                await api.delete(`/api/books/${id}`, config);
                 toast.success('Book deleted successfully');
                 fetchBooks();
             } catch (error) {
@@ -65,7 +70,7 @@ const ProductList = () => {
                     Authorization: `Bearer ${user?.token}`,
                 },
             };
-            const { data } = await axios.post('http://localhost:5000/api/books', {}, config);
+            const { data } = await api.post('/api/books', {}, config);
             toast.success('Sample book created');
             navigate(`/admin/product/${data._id}/edit`);
         } catch (error) {

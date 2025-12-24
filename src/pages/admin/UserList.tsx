@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Trash2, Users, Shield, ShieldAlert, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
 
@@ -34,7 +34,7 @@ const UserList = () => {
             const config = {
                 headers: { Authorization: `Bearer ${currentUser?.token}` },
             };
-            const { data } = await axios.get('http://localhost:5000/api/users', config);
+            const { data } = await api.get('/api/users', config);
             setUsers(data);
         } catch (error) {
             toast.error('Error fetching users');
@@ -49,7 +49,7 @@ const UserList = () => {
                 const config = {
                     headers: { Authorization: `Bearer ${currentUser?.token}` },
                 };
-                await axios.delete(`http://localhost:5000/api/users/${id}`, config);
+                await api.delete(`/api/users/${id}`, config);
                 toast.success('User deleted');
                 fetchUsers();
             } catch (error) {
@@ -66,7 +66,7 @@ const UserList = () => {
                     Authorization: `Bearer ${currentUser?.token}`
                 },
             };
-            await axios.put(`http://localhost:5000/api/users/${id}`, { isAdmin: !isAdmin }, config);
+            await api.put(`/api/users/${id}`, { isAdmin: !isAdmin }, config);
             toast.success(isAdmin ? 'User removed from admin' : 'User made admin');
             fetchUsers();
         } catch (error) {

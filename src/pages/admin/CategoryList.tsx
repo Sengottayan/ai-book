@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'sonner';
@@ -35,7 +35,7 @@ const CategoryList = () => {
 
     const fetchCategories = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/categories');
+            const { data } = await api.get('/api/categories');
             setCategories(data);
             setLoading(false);
         } catch (error) {
@@ -61,7 +61,7 @@ const CategoryList = () => {
             const config = {
                 headers: { Authorization: `Bearer ${user?.token}` },
             };
-            await axios.post('http://localhost:5000/api/categories', { name: newCategory, description: newDesc }, config);
+            await api.post('/api/categories', { name: newCategory, description: newDesc }, config);
             toast.success('Category created');
             setNewCategory('');
             setNewDesc('');
@@ -79,7 +79,7 @@ const CategoryList = () => {
             const config = {
                 headers: { Authorization: `Bearer ${user?.token}` },
             };
-            await axios.delete(`http://localhost:5000/api/categories/${id}`, config);
+            await api.delete(`/api/categories/${id}`, config);
             toast.success('Category deleted');
             fetchCategories();
         } catch (error) {

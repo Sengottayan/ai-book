@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Check, X } from 'lucide-react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { toast } from 'sonner';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ const OrderList = () => {
                     Authorization: `Bearer ${user?.token}`,
                 },
             };
-            const { data } = await axios.get('http://localhost:5000/api/orders', config);
+            const { data } = await api.get('/api/orders', config);
             setOrders(data);
         } catch (error) {
             toast.error('Failed to fetch orders');
