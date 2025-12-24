@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
 import { Book } from '@/types/book';
@@ -33,7 +33,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const config = {
                 headers: { Authorization: `Bearer ${user?.token}` },
             };
-            const { data } = await axios.get('http://localhost:5000/api/users/wishlist', config);
+            const { data } = await api.get('/api/users/wishlist', config);
 
             // Map _id to id if necessary
             const mappedWishlist = data.map((item: any) => ({
@@ -68,7 +68,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const config = {
                 headers: { Authorization: `Bearer ${user?.token}` },
             };
-            await axios.post('http://localhost:5000/api/users/wishlist', { bookId: book.id }, config);
+            await api.post('/api/users/wishlist', { bookId: book.id }, config);
             setWishlist([...wishlist, book]);
             toast.success('Added to wishlist');
         } catch (error) {
@@ -83,7 +83,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const config = {
                 headers: { Authorization: `Bearer ${user?.token}` },
             };
-            await axios.delete(`http://localhost:5000/api/users/wishlist/${bookId}`, config);
+            await api.delete(`/api/users/wishlist/${bookId}`, config);
             setWishlist(wishlist.filter((item) => item.id !== bookId));
             toast.success('Removed from wishlist');
         } catch (error) {
