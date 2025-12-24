@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Order from '../models/Order.js';
 import User from '../models/User.js';
 import sendEmail from '../utils/sendEmail.js';
+import { generateInvoiceTemplate } from '../utils/invoiceTemplate.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -50,16 +51,14 @@ const addOrderItems = asyncHandler(async (req, res) => {
 
         const createdOrder = await order.save();
 
-        // Send Email
+
+        // Send Email with Invoice
+        const invoiceHtml = generateInvoiceTemplate(createdOrder, req.user);
+
         await sendEmail({
             to: req.user.email,
-            subject: 'Order Confirmation - BookHaven',
-            html: `
-                <h1>Order Confirmed</h1>
-                <p>Thank you for your order, ${req.user.name}!</p>
-                <p>Order ID: ${createdOrder._id}</p>
-                <p>Total: ₹${totalPrice}</p>
-            `
+            subject: `Invoice for Order #${createdOrder._id} - BookHaven`,
+            html: invoiceHtml
         });
 
         res.status(201).json(createdOrder);
