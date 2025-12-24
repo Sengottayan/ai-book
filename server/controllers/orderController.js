@@ -55,9 +55,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
         // Send Email with Invoice
         const invoiceHtml = generateInvoiceTemplate(createdOrder, req.user);
 
-        // Send Email with Invoice (Fire and forget, don't await/block response)
-        const invoiceHtml = generateInvoiceTemplate(createdOrder, req.user);
-
+        // Fire and forget, don't await/block response
         sendEmail({
             to: req.user.email,
             subject: `Invoice for Order #${createdOrder._id} - BookHaven`,
