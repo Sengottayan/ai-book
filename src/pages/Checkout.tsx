@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import axios from 'axios';
+import api from '@/lib/axios';
 
 declare global {
   interface Window {
@@ -40,7 +40,7 @@ const Checkout = () => {
     if (!promoCode) return;
     try {
       const config = { headers: { Authorization: `Bearer ${user?.token}` } };
-      const { data } = await axios.post('http://localhost:5000/api/offers/validate', { code: promoCode }, config);
+      const { data } = await api.post('/api/offers/validate', { code: promoCode }, config);
       setDiscountPercent(data.discountPercentage);
       toast.success(`Coupon Applied! ${data.description}`);
     } catch (error: any) {
@@ -87,11 +87,11 @@ const Checkout = () => {
         totalPrice: total,
       };
 
-      const { data: createdOrder } = await axios.post('http://localhost:5000/api/orders', orderData, orderConfig);
+      const { data: createdOrder } = await api.post('/api/orders', orderData, orderConfig);
 
       // 2. Initiate Payment (Razorpay)
       if (paymentMethod === 'razorpay') {
-        const { data: session } = await axios.post('http://localhost:5000/api/payment/create-session', {
+        const { data: session } = await api.post('/api/payment/create-session', {
           orderId: createdOrder._id
         }, orderConfig);
 
@@ -105,7 +105,7 @@ const Checkout = () => {
           order_id: session.order_id,
           handler: async function (response: any) {
             try {
-              await axios.post('http://localhost:5000/api/payment/verify', {
+              await api.post('/api/payment/verify', {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_signature: response.razorpay_signature,

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Star, ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw, Minus, Plus, ChevronLeft } from 'lucide-react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { toast } from 'sonner';
 
 import Layout from '@/components/layout/Layout';
@@ -63,8 +63,8 @@ const BookDetail = () => {
           Authorization: `Bearer ${user?.token}`,
         },
       };
-      await axios.post(
-        `http://localhost:5000/api/books/${id}/reviews`,
+      await api.post(
+        `/api/books/${id}/reviews`,
         { rating, comment },
         config
       );
@@ -72,7 +72,7 @@ const BookDetail = () => {
       setComment('');
       setRating(5);
       // Refetch book to show new review
-      const { data } = await axios.get(`http://localhost:5000/api/books/${id}`);
+      const { data } = await api.get(`/api/books/${id}`);
       data.id = data._id;
       setBook(data);
     } catch (error: any) {
@@ -85,13 +85,13 @@ const BookDetail = () => {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/books/${id}`);
+        const { data } = await api.get(`/api/books/${id}`);
         // Map _id to id
         data.id = data._id;
         setBook(data);
 
         // Fetch related books
-        const relatedRes = await axios.get(`http://localhost:5000/api/books?category=${data.category}`);
+        const relatedRes = await api.get(`/api/books?category=${data.category}`);
         const related = relatedRes.data
           .filter((b: any) => b._id !== data._id)
           .map((b: any) => ({ ...b, id: b._id }))

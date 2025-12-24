@@ -4,7 +4,7 @@ import { ArrowRight, Trophy, Star, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Book } from '@/types/book';
 
 const BestsellerSection = () => {
@@ -14,7 +14,7 @@ const BestsellerSection = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/books?bestseller=true');
+        const { data } = await api.get('/api/books?bestseller=true');
         // Map _id and slice
         const books = data.map((b: any) => ({ ...b, id: b._id })).slice(0, 5);
         setBestsellers(books);

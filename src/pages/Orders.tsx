@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Clock, Package } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +55,7 @@ const Orders = () => {
                         Authorization: `Bearer ${user.token}`,
                     },
                 };
-                const { data } = await axios.get('http://localhost:5000/api/orders/myorders', config);
+                const { data } = await api.get('/api/orders/myorders', config);
                 setOrders(data);
             } catch (error: any) {
                 console.error(error);

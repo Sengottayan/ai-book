@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
@@ -57,10 +57,9 @@ const Login = () => {
       };
 
       if (isLogin) {
-        const { data } = await axios.post(
-          'http://localhost:5000/api/users/login',
-          { email, password },
-          config
+        const { data } = await api.post(
+          '/api/users/login',
+          { email, password }
         );
 
         // Logic to enforce Admin Login separation
@@ -90,10 +89,9 @@ const Login = () => {
 
       } else {
         // Register (Always User)
-        const { data } = await axios.post(
-          'http://localhost:5000/api/users',
-          { name, email, password },
-          config
+        const { data } = await api.post(
+          '/api/users',
+          { name, email, password }
         );
         login(data);
         toast.success('Account created successfully!');

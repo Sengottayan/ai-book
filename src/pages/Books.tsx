@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { categories } from '@/data/mockBooks';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Book } from '@/types/book';
 
 const Books = () => {
@@ -33,7 +33,7 @@ const Books = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/books');
+        const { data } = await api.get('/api/books');
 
         // Map _id to id for frontend compatibility
         const mappedBooks = data.map((book: any) => ({

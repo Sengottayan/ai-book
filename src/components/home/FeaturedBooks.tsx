@@ -4,7 +4,7 @@ import { ArrowRight, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BookCard from '@/components/books/BookCard';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { Book } from '@/types/book';
 
 const FeaturedBooks = () => {
@@ -13,7 +13,7 @@ const FeaturedBooks = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/books?featured=true');
+        const { data } = await api.get('/api/books?featured=true');
         // Map _id and slice
         const books = data.map((b: any) => ({ ...b, id: b._id })).slice(0, 4);
         setFeaturedBooks(books);

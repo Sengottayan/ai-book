@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '@/lib/axios';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,8 +71,8 @@ const Profile = () => {
                 userData.address = { street, city, state, zip, country };
             }
 
-            const { data } = await axios.put(
-                'http://localhost:5000/api/users/profile',
+            const { data } = await api.put(
+                '/api/users/profile',
                 userData,
                 config
             );
