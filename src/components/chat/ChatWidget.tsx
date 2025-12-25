@@ -152,12 +152,21 @@ const ChatWidget = () => {
                                             {msg.sender === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                                         </div>
                                         <div className={`
-                      p-3 rounded-lg text-sm max-w-[80%]
+                      p-3 rounded-lg text-sm max-w-[80%] whitespace-pre-wrap
                       ${msg.sender === 'user'
                                                 ? 'bg-primary text-primary-foreground rounded-tr-none'
                                                 : 'bg-card border border-border rounded-tl-none shadow-sm'}
                     `}>
-                                            {msg.text}
+                                            {msg.text.split('\n').map((line, i) => (
+                                                <span key={i}>
+                                                    {line.split(/(\*\*.*?\*\*)/).map((part, j) =>
+                                                        part.startsWith('**') && part.endsWith('**')
+                                                            ? <strong key={j}>{part.slice(2, -2)}</strong>
+                                                            : part
+                                                    )}
+                                                    <br />
+                                                </span>
+                                            ))}
                                         </div>
                                     </div>
                                 ))}
