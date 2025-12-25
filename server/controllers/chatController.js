@@ -19,9 +19,9 @@ const handleChat = asyncHandler(async (req, res) => {
     };
 
     try {
-        const n8nUrl = process.env.N8N_WEBHOOK_URL || 'https://yogesh3733.app.n8n.cloud/webhook/bookhaven-ai';
+        const webhookUrl = process.env.N8N_WEBHOOK_URL || 'https://sengon8n.app.n8n.cloud/webhook/ai-book';
         const n8nResponse = await axios.post(
-            n8nUrl,
+            webhookUrl,
             payload
         );
 
