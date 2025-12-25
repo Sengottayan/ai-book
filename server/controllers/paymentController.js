@@ -64,20 +64,27 @@ const verifyPayment = asyncHandler(async (req, res) => {
     console.log(`[Payment Verify] Expected: ${expectedSignature}, Received: ${razorpay_signature}`);
 
     if (expectedSignature === razorpay_signature) {
-        const order = await Order.findById(orderId);
-        if (order) {
-            order.isPaid = true;
-            order.paidAt = Date.now();
-            order.paymentResult = {
-                id: razorpay_payment_id,
-                status: 'success',
-                update_time: Date.now().toString(),
-                email_address: ""
-            };
-            await order.save();
+        // Use findByIdAndUpdate for atomic robust update
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            {
+                isPaid: true,
+                paidAt: Date.now(),
+                paymentResult: {
+                    id: razorpay_payment_id,
+                    status: 'success',
+                    update_time: Date.now().toString(),
+                    email_address: ""
+                }
+            },
+            { new: true } // Return the updated doc
+        );
+
+        if (updatedOrder) {
             console.log(`[Payment Verify] Success for Order ${orderId}`);
             res.json({ message: "Payment Verified", verified: true });
         } else {
+            console.error(`[Payment Verify] Order not found during update: ${orderId}`);
             res.status(404);
             throw new Error("Order not found");
         }
