@@ -58,6 +58,10 @@ import offerRoutes from './routes/offerRoutes.js';
 app.use('/api/offers', offerRoutes);
 import categoryRoutes from './routes/categoryRoutes.js';
 app.use('/api/categories', categoryRoutes);
+import chatRoutes from './routes/chatRoutes.js';
+app.use('/api/chat', chatRoutes);
+
+
 
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 

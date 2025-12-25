@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/axios';
 
 interface Message {
     id: string;
@@ -32,9 +34,23 @@ const ChatWidget = () => {
         }
     }, [messages, isOpen]);
 
+    const { user } = useAuth();
     const handleSend = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!inputValue.trim()) return;
+
+        if (!user) {
+            setMessages((prev) => [
+                ...prev,
+                {
+                    id: Date.now().toString(),
+                    sender: 'bot',
+                    text: 'Please login to use the AI assistant.',
+                    timestamp: new Date(),
+                }
+            ]);
+            return;
+        }
 
         const userMsg: Message = {
             id: Date.now().toString(),
@@ -45,7 +61,54 @@ const ChatWidget = () => {
 
         setMessages((prev) => [...prev, userMsg]);
         setInputValue('');
-        // No backend call for now
+        setLoading(true);
+
+        try {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                },
+            };
+
+            const response = await api.post('/api/chat', {
+                chatId: user._id, // Using user ID as chat ID for simplicity/persistence per user
+                message: userMsg.text
+            }, config);
+
+            // Handle various n8n response formats
+            let botText = "I received your message but couldn't parse the response.";
+            if (typeof response.data === 'string') {
+                botText = response.data;
+            } else if (response.data.text) {
+                botText = response.data.text;
+            } else if (response.data.message) {
+                botText = response.data.message;
+            } else if (response.data.output) {
+                botText = response.data.output;
+            } else {
+                botText = JSON.stringify(response.data);
+            }
+
+            const botMsg: Message = {
+                id: (Date.now() + 1).toString(),
+                sender: 'bot',
+                text: botText,
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, botMsg]);
+
+        } catch (error) {
+            console.error('Chat Error:', error);
+            const errorMsg: Message = {
+                id: (Date.now() + 1).toString(),
+                sender: 'bot',
+                text: "Sorry, I'm having trouble connecting to the server right now.",
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorMsg]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
