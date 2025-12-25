@@ -1,36 +1,39 @@
-import nodemailer from 'nodemailer';
+import axios from 'axios';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Use SSL
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
-
 const sendEmail = async ({ to, subject, html }) => {
-    try {
-        const mailOptions = {
-            from: `"BookHaven" <${process.env.EMAIL_USER}>`,
-            to,
-            subject,
-            html,
-        };
-
-        // MOCK EMAIL for Stability (Prevents Render Timeouts)
+    // Check if RESEND_API_KEY is present
+    if (!process.env.RESEND_API_KEY) {
+        console.warn('[EMAIL] RESEND_API_KEY is missing. Using Mock.');
         console.log(`[MOCK EMAIL] To: ${to}, Subject: ${subject}`);
-        return Promise.resolve({ response: 'Email simulated' });
+        return Promise.resolve({ response: 'Mock success' });
+    }
 
-        // const info = await transporter.sendMail(mailOptions);
-        // console.log('Email sent: ' + info.response);
-        // return info;
+    try {
+        const response = await axios.post(
+            'https://api.resend.com/emails',
+            {
+                from: 'BookHaven <onboarding@resend.dev>', // Default Resend testing domain
+                to: [to],
+                subject: subject,
+                html: html,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                },
+            }
+        );
+
+        console.log('[EMAIL] Sent via Resend:', response.data.id);
+        return response.data;
     } catch (error) {
-        console.error('Error sending email:', error);
-        // Don't throw error to avoid breaking the main flow if email fails
+        console.error('[EMAIL] Resend Error:', error.response?.data || error.message);
+        // Fallback or just log
+        // throw new Error('Email sending failed'); 
     }
 };
 

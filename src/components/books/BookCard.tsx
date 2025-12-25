@@ -4,6 +4,7 @@ import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { Badge } from '@/components/ui/badge';
 
 interface BookCardProps {
@@ -13,8 +14,9 @@ interface BookCardProps {
 
 const BookCard = ({ book, index = 0 }: BookCardProps) => {
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
-  const discount = book.originalPrice 
+  const discount = book.originalPrice
     ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)
     : 0;
 
@@ -40,8 +42,23 @@ const BookCard = ({ book, index = 0 }: BookCardProps) => {
       </div>
 
       {/* Wishlist Button */}
-      <button className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-card hover:text-accent">
-        <Heart className="h-4 w-4" />
+      {/* Wishlist Button */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation(); // Prevent navigating to book details
+          if (isInWishlist(book.id)) {
+            removeFromWishlist(book.id);
+          } else {
+            addToWishlist(book);
+          }
+        }}
+        className={`absolute top-3 right-3 z-10 h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300 ${isInWishlist(book.id)
+          ? 'bg-red-50 text-red-500 opacity-100'
+          : 'bg-card/80 opacity-0 group-hover:opacity-100 hover:bg-card hover:text-accent'
+          }`}
+      >
+        <Heart className={`h-4 w-4 ${isInWishlist(book.id) ? 'fill-current' : ''}`} />
       </button>
 
       {/* Cover Image */}
@@ -61,13 +78,13 @@ const BookCard = ({ book, index = 0 }: BookCardProps) => {
             {book.category}
           </span>
         </div>
-        
+
         <Link to={`/book/${book.id}`}>
           <h3 className="font-serif font-semibold text-foreground line-clamp-1 hover:text-primary transition-colors">
             {book.title}
           </h3>
         </Link>
-        
+
         <p className="text-sm text-muted-foreground mt-1">
           by {book.author}
         </p>
