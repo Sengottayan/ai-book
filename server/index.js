@@ -59,6 +59,11 @@ app.use('/api/offers', offerRoutes);
 import categoryRoutes from './routes/categoryRoutes.js';
 app.use('/api/categories', categoryRoutes);
 
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+
+app.use(notFound);
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
