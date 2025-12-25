@@ -27,9 +27,16 @@ const handleChat = asyncHandler(async (req, res) => {
 
         res.json(n8nResponse.data);
     } catch (error) {
-        console.error('Error forwarding to n8n:', error.message);
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.error('n8n Error Data:', error.response.data);
+            console.error('n8n Error Status:', error.response.status);
+        } else {
+            console.error('Error forwarding to n8n:', error.message);
+        }
         res.status(502);
-        throw new Error('Failed to communicate with AI service');
+        throw new Error('Failed to communicate with AI service: ' + (error.response?.data?.message || error.message));
     }
 });
 
