@@ -31,6 +31,12 @@ const sendEmail = async ({ to, subject, html }) => {
         console.log('[EMAIL] Sent via Resend:', response.data.id);
         return response.data;
     } catch (error) {
+        if (error.response?.status === 403) {
+            console.warn('[EMAIL] Resend Sandbox Mode Restriction:');
+            console.warn(`[EMAIL] Failed to send to ${to}. Verify domain or use verified email.`);
+            // Don't throw, just log.
+            return { success: false, reason: 'sandbox_restriction' };
+        }
         console.error('[EMAIL] Resend Error:', error.response?.data || error.message);
         // Fallback or just log
         // throw new Error('Email sending failed'); 

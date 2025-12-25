@@ -121,23 +121,31 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/orders')}>
-                    My Orders
-                  </DropdownMenuItem>
+                  {!user.isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate('/orders')}>
+                      My Orders
+                    </DropdownMenuItem>
+                  )}
                   {user.isAdmin && (
                     <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider">Admin</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
                         Dashboard
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/admin/productlist')}>
-                        Products (Admin)
+                        Products
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/admin/orderlist')}>
-                        Orders (Admin)
+                        Orders
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/admin/userlist')}>
+                        Users
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                     </>
                   )}
-                  <DropdownMenuItem onClick={logout}>
+                  <DropdownMenuItem onClick={logout} className="text-red-500 focus:text-red-500">
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
