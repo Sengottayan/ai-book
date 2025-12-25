@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -28,7 +28,7 @@ const Contact = () => {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:5000/api/messages', formData);
+            await api.post('/api/messages', formData);
             toast.success('Message sent successfully! We will get back to you soon.');
             setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (error: any) {

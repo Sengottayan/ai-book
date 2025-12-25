@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Trash2, CheckCircle, Mail, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
 
@@ -37,40 +37,40 @@ const MessageList = () => {
             const config = {
                 headers: { Authorization: `Bearer ${user?.token}` },
             };
-            const { data } = await axios.get('http://localhost:5000/api/messages', config);
+            const { data } = await api.get('/api/messages', config);
             setMessages(data);
         } catch (error) {
-            toast.error('Error fetching messages');
+            toast.error('Failed to fetch messages');
         } finally {
             setLoading(false);
         }
     };
 
-    const deleteHandler = async (id: string) => {
+    const handleDelete = async (id: string) => {
         if (window.confirm('Are you sure you want to delete this message?')) {
             try {
                 const config = {
                     headers: { Authorization: `Bearer ${user?.token}` },
                 };
-                await axios.delete(`http://localhost:5000/api/messages/${id}`, config);
+                await api.delete(`/api/messages/${id}`, config);
                 toast.success('Message deleted');
                 fetchMessages();
             } catch (error) {
-                toast.error('Error deleting message');
+                toast.error('Failed to delete message');
             }
         }
     };
 
-    const markAsReadHandler = async (id: string) => {
+    const markAsRead = async (id: string) => {
         try {
             const config = {
                 headers: { Authorization: `Bearer ${user?.token}` },
             };
-            await axios.put(`http://localhost:5000/api/messages/${id}/read`, {}, config);
+            await api.put(`/api/messages/${id}/read`, {}, config);
             toast.success('Message marked as read');
             fetchMessages();
         } catch (error) {
-            toast.error('Error updating message');
+            toast.error('Failed to update message status');
         }
     }
 
@@ -125,14 +125,14 @@ const MessageList = () => {
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 {!msg.isRead && (
-                                                    <Button variant="ghost" size="icon" onClick={() => markAsReadHandler(msg._id)} title="Mark as Read">
+                                                    <Button variant="ghost" size="icon" onClick={() => markAsRead(msg._id)} title="Mark as Read">
                                                         <CheckCircle className="h-4 w-4 text-green-600" />
                                                     </Button>
                                                 )}
                                                 <Button variant="ghost" size="icon" onClick={() => window.location.href = `mailto:${msg.email}`}>
                                                     <Mail className="h-4 w-4 text-blue-600" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => deleteHandler(msg._id)}>
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(msg._id)}>
                                                     <Trash2 className="h-4 w-4 text-destructive" />
                                                 </Button>
                                             </div>
