@@ -1,45 +1,41 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const sendEmail = async ({ to, subject, html }) => {
-    // Check if RESEND_API_KEY is present
-    if (!process.env.RESEND_API_KEY) {
-        console.warn('[EMAIL] RESEND_API_KEY is missing. Using Mock.');
+    // EmailJS Credentials
+    const serviceId = process.env.EMAILJS_SERVICE_ID;
+    const templateId = process.env.EMAILJS_TEMPLATE_ID;
+    const publicKey = process.env.EMAILJS_PUBLIC_KEY;
+    const privateKey = process.env.EMAILJS_PRIVATE_KEY;
+
+    // Check if keys are missing
+    if (!serviceId || !templateId || !publicKey || !privateKey) {
+        console.warn('[EMAIL] EmailJS keys missing. Using Mock.');
         console.log(`[MOCK EMAIL] To: ${to}, Subject: ${subject}`);
         return Promise.resolve({ response: 'Mock success' });
     }
 
     try {
-        const response = await axios.post(
-            'https://api.resend.com/emails',
-            {
-                from: 'BookHaven <onboarding@resend.dev>', // Default Resend testing domain
-                to: [to],
+        const response = await axios.post('https://api.emailjs.com/api/v1.0/email/send', {
+            service_id: serviceId,
+            template_id: templateId,
+            user_id: publicKey,
+            accessToken: privateKey,
+            template_params: {
+                to_email: to,
                 subject: subject,
-                html: html,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-                },
+                html_content: html,
             }
-        );
+        });
 
-        console.log('[EMAIL] Sent via Resend:', response.data.id);
-        return response.data;
+        console.log('[EMAIL] Sent via EmailJS:', response.data);
+        return { success: true, data: response.data };
+
     } catch (error) {
-        if (error.response?.status === 403) {
-            console.warn('[EMAIL] Resend Sandbox Mode Restriction:');
-            console.warn(`[EMAIL] Failed to send to ${to}. Verify domain or use verified email.`);
-            // Don't throw, just log.
-            return { success: false, reason: 'sandbox_restriction' };
-        }
-        console.error('[EMAIL] Resend Error:', error.response?.data || error.message);
-        // Fallback or just log
-        // throw new Error('Email sending failed'); 
+        console.error('[EMAIL] EmailJS Error:', error.response?.data || error.message);
+        // Don't throw to avoid crashing checkout
+        return { success: false, error: error.message };
     }
 };
 
