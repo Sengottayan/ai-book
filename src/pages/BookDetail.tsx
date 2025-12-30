@@ -241,8 +241,12 @@ const BookDetail = () => {
               {/* Stock Status */}
               <div className="flex items-center gap-2">
                 <div className={`h-2 w-2 rounded-full ${book.stock > 10 ? 'bg-green-500' : 'bg-orange-500'}`} />
-                <span className="text-sm">
-                  {book.stock > 10 ? 'In Stock' : `Only ${book.stock} left`}
+                <span className="text-sm font-medium">
+                  {book.stock > 0 ? (
+                    book.stock > 10 ? `In Stock (${book.stock} available)` : `Hurry! Only ${book.stock} left`
+                  ) : (
+                    <span className="text-destructive">Out of Stock</span>
+                  )}
                 </span>
               </div>
 
@@ -251,14 +255,16 @@ const BookDetail = () => {
                 <div className="flex items-center gap-2 bg-secondary rounded-lg p-1">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="h-10 w-10 rounded-md hover:bg-card flex items-center justify-center transition-colors"
+                    disabled={book.stock === 0}
+                    className="h-10 w-10 rounded-md hover:bg-card flex items-center justify-center transition-colors disabled:opacity-50"
                   >
                     <Minus className="h-4 w-4" />
                   </button>
                   <span className="w-12 text-center font-semibold">{quantity}</span>
                   <button
                     onClick={() => setQuantity(Math.min(book.stock, quantity + 1))}
-                    className="h-10 w-10 rounded-md hover:bg-card flex items-center justify-center transition-colors"
+                    disabled={book.stock === 0 || quantity >= book.stock}
+                    className="h-10 w-10 rounded-md hover:bg-card flex items-center justify-center transition-colors disabled:opacity-50"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -268,10 +274,11 @@ const BookDetail = () => {
                   variant="gold"
                   size="lg"
                   onClick={() => addToCart(book, quantity)}
+                  disabled={book.stock === 0}
                   className="flex-1 md:flex-none gap-2"
                 >
                   <ShoppingCart className="h-5 w-5" />
-                  Add to Cart
+                  {book.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                 </Button>
 
                 <Button
@@ -289,7 +296,28 @@ const BookDetail = () => {
                   <Heart className={`h-5 w-5 ${isInWishlist(book.id) ? "fill-red-500 text-red-500" : ""}`} />
                 </Button>
 
-                <Button variant="outline" size="icon" className="h-12 w-12">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12"
+                  onClick={async () => {
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({
+                          title: book.title,
+                          text: `Check out ${book.title} on BookHaven!`,
+                          url: window.location.href,
+                        });
+                      } catch (err) {
+                        console.log('Error sharing:', err);
+                      }
+                    } else {
+                      // Fallback for desktop/browsers without native share
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success('Link copied to clipboard!');
+                    }
+                  }}
+                >
                   <Share2 className="h-5 w-5" />
                 </Button>
               </div>

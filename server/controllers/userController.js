@@ -290,6 +290,21 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Check if user exists
+// @route   POST /api/users/check-email
+// @access  Public
+const checkUserExists = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user) {
+        res.status(200).json({ exists: true, message: 'User found', name: user.name });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
 export {
     authUser,
     registerUser,
@@ -304,4 +319,5 @@ export {
     deleteUser,
     getUserById,
     updateUser,
+    checkUserExists,
 };

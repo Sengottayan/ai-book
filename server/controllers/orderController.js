@@ -145,9 +145,24 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 // @desc    Get dashboard stats
 // @route   GET /api/orders/stats
 // @access  Private/Admin
+// @desc    Get dashboard stats
+// @route   GET /api/orders/stats
+// @access  Private/Admin
 const getDashboardStats = asyncHandler(async (req, res) => {
-    const orders = await Order.find({});
-    const users = await User.countDocuments();
+    const { startDate, endDate } = req.query;
+
+    let dateFilter = {};
+    if (startDate && endDate) {
+        dateFilter = {
+            createdAt: {
+                $gte: new Date(startDate),
+                $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+            }
+        };
+    }
+
+    const orders = await Order.find(dateFilter);
+    const users = await User.countDocuments(dateFilter);
     // Assuming Book model is registered
     const books = await mongoose.model('Book').countDocuments();
 
@@ -164,6 +179,57 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc    Cancel order (User)
+// @route   PUT /api/orders/:id/cancel
+// @access  Private
+const cancelOrder = asyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+        if (order.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+            res.status(401);
+            throw new Error('Not authorized to cancel this order');
+        }
+
+        if (order.status === 'Shipped' || order.status === 'Delivered' || order.status === 'Cancelled') {
+            res.status(400);
+            throw new Error(`Cannot cancel order that is ${order.status}`);
+        }
+
+        order.status = 'Cancelled';
+        // Optional: refund logic here or manual process
+        // Optional: restore stock
+
+        const updatedOrder = await order.save();
+        res.json(updatedOrder);
+    } else {
+        res.status(404);
+        throw new Error('Order not found');
+    }
+});
+
+// @desc    Update order status (Admin)
+// @route   PUT /api/orders/:id/status
+// @access  Private/Admin
+const updateOrderStatus = asyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+        order.status = req.body.status;
+
+        if (req.body.status === 'Delivered') {
+            order.isDelivered = true;
+            order.deliveredAt = Date.now();
+        }
+
+        const updatedOrder = await order.save();
+        res.json(updatedOrder);
+    } else {
+        res.status(404);
+        throw new Error('Order not found');
+    }
+});
+
 export {
     addOrderItems,
     getOrderById,
@@ -171,5 +237,7 @@ export {
     updateOrderToDelivered,
     getMyOrders,
     getOrders,
-    getDashboardStats
+    getDashboardStats,
+    cancelOrder,
+    updateOrderStatus
 };

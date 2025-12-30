@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import api from '@/lib/axios';
 import { toast } from 'sonner';
-import Layout from '@/components/layout/Layout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -79,12 +79,12 @@ const ProductList = () => {
     };
 
     return (
-        <Layout>
+        <AdminLayout>
             <Helmet>
                 <title>Admin Products | BookHaven</title>
             </Helmet>
 
-            <div className="container mx-auto px-4 py-8">
+            <div className="w-full">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold font-serif">Products</h1>
                     <Button onClick={createBookHandler} className="gap-2">
@@ -141,7 +141,7 @@ const ProductList = () => {
                     </div>
                 )}
             </div>
-        </Layout>
+        </AdminLayout>
     );
 };
 

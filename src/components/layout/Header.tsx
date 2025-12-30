@@ -58,54 +58,64 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="text-muted-foreground hover:text-foreground font-medium transition-colors relative group"
-              >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
-              </Link>
-            ))}
-          </nav>
+          {!user?.isAdmin && (
+            <nav className="hidden lg:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className="text-muted-foreground hover:text-foreground font-medium transition-colors relative group"
+                >
+                  {link.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+                </Link>
+              ))}
+            </nav>
+          )}
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search books, authors..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 bg-secondary/50 border-transparent focus:border-primary focus:bg-card"
-              />
-            </div>
-          </form>
+          {/* Search Bar - Only for non-admins usually, or maybe admins want to search books too? 
+              User request implies removing "purchasing options" etc. Search is for browsing to purchase. 
+              Let's hide it for Admin to focus on management. */}
+          {!user?.isAdmin && (
+            <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-md mx-8">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search books, authors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 bg-secondary/50 border-transparent focus:border-primary focus:bg-card"
+                />
+              </div>
+            </form>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-4">
-            <Link to="/wishlist">
-              <Button variant="ghost" size="icon">
-                <Heart className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/cart" className="relative">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 h-5 w-5 bg-accent text-accent-foreground text-xs font-bold rounded-full flex items-center justify-center"
-                  >
-                    {cartCount}
-                  </motion.span>
-                )}
-              </Button>
-            </Link>
+            {!user?.isAdmin && (
+              <>
+                <Link to="/wishlist">
+                  <Button variant="ghost" size="icon">
+                    <Heart className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/cart" className="relative">
+                  <Button variant="ghost" size="icon" className="relative">
+                    <ShoppingCart className="h-5 w-5" />
+                    {cartCount > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-1 -right-1 h-5 w-5 bg-accent text-accent-foreground text-xs font-bold rounded-full flex items-center justify-center"
+                      >
+                        {cartCount}
+                      </motion.span>
+                    )}
+                  </Button>
+                </Link>
+              </>
+            )}
 
             {user ? (
               <DropdownMenu>
@@ -128,24 +138,14 @@ const Header = () => {
                   )}
                   {user.isAdmin && (
                     <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider">Admin</DropdownMenuLabel>
+                      {/* Admin Links in Sidebar now, but handy to have Dashboard here */}
                       <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
                         Dashboard
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/admin/productlist')}>
-                        Products
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/admin/orderlist')}>
-                        Orders
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/admin/userlist')}>
-                        Users
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
                     </>
                   )}
-                  <DropdownMenuItem onClick={logout} className="text-red-500 focus:text-red-500">
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => { logout(); navigate('/'); }} className="text-red-500 focus:text-red-500 cursor-pointer">
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -204,7 +204,7 @@ const Header = () => {
             className="lg:hidden bg-card border-t border-border overflow-hidden"
           >
             <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-              {navLinks.map((link) => (
+              {!user?.isAdmin && navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
@@ -214,14 +214,27 @@ const Header = () => {
                   {link.name}
                 </Link>
               ))}
-              <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-                <Link to="/login" className="flex-1" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">Sign In</Button>
+
+              {user?.isAdmin && (
+                <Link
+                  to="/admin/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-3 text-foreground hover:bg-secondary rounded-lg font-medium transition-colors"
+                >
+                  Admin Dashboard
                 </Link>
-                <Link to="/login" className="flex-1" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full">Join Now</Button>
-                </Link>
-              </div>
+              )}
+
+              {!user && (
+                <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                  <Link to="/login" className="flex-1" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" className="w-full">Sign In</Button>
+                  </Link>
+                  <Link to="/login" className="flex-1" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full">Join Now</Button>
+                  </Link>
+                </div>
+              )}
             </nav>
           </motion.div>
         )}

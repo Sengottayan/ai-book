@@ -123,8 +123,36 @@ const Orders = () => {
                                             >
                                                 Invoice
                                             </Button>
+
+                                            {/* Cancel Button Logic */}
+                                            {['Processing', 'Pending', 'Confirmed', 'Packed'].includes(order.status) && (
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={async () => {
+                                                        if (window.confirm('Are you sure you want to cancel this order?')) {
+                                                            try {
+                                                                const config = { headers: { Authorization: `Bearer ${user?.token}` } };
+                                                                await api.put(`/api/orders/${order._id}/cancel`, {}, config);
+                                                                // Refresh orders locally
+                                                                const updatedOrders = orders.map(o =>
+                                                                    o._id === order._id ? { ...o, status: 'Cancelled' } : o
+                                                                );
+                                                                setOrders(updatedOrders);
+                                                                // Also toast import might be missing, assuming simplified for now or rely on global
+                                                            } catch (err) {
+                                                                console.error(err);
+                                                                alert('Failed to cancel order');
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    Cancel Order
+                                                </Button>
+                                            )}
+
                                             {order.isPaid ? <Badge className="bg-green-600">Paid</Badge> : <Badge variant="destructive">Not Paid</Badge>}
-                                            <Badge variant="outline">{order.status}</Badge>
+                                            <Badge variant={order.status === 'Cancelled' ? 'destructive' : 'outline'}>{order.status}</Badge>
                                         </div>
                                     </div>
 

@@ -159,11 +159,28 @@ const ChatWidget = () => {
                     `}>
                                             {msg.text.split('\n').map((line, i) => (
                                                 <span key={i}>
-                                                    {line.split(/(\*\*.*?\*\*)/).map((part, j) =>
-                                                        part.startsWith('**') && part.endsWith('**')
-                                                            ? <strong key={j}>{part.slice(2, -2)}</strong>
-                                                            : part
-                                                    )}
+                                                    {line.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g).map((part, j) => {
+                                                        if (part.startsWith('**') && part.endsWith('**')) {
+                                                            return <strong key={j}>{part.slice(2, -2)}</strong>;
+                                                        } else if (part.startsWith('[') && part.includes('](') && part.endsWith(')')) {
+                                                            const match = part.match(/\[(.*?)\]\((.*?)\)/);
+                                                            if (match) {
+                                                                return (
+                                                                    <a
+                                                                        key={j}
+                                                                        href={match[2]}
+                                                                        className="text-blue-500 underline hover:text-blue-700"
+                                                                        onClick={(e) => {
+                                                                            // If internal link, you might want to use navigate(), but standard <a> works fine for now
+                                                                        }}
+                                                                    >
+                                                                        {match[1]}
+                                                                    </a>
+                                                                );
+                                                            }
+                                                        }
+                                                        return part;
+                                                    })}
                                                     <br />
                                                 </span>
                                             ))}

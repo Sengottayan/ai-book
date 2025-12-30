@@ -3,11 +3,27 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Trash2, CheckCircle, Mail, MessageSquare } from 'lucide-react';
+import { Trash2, CheckCircle, Mail, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/axios';
-import Layout from '@/components/layout/Layout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { useAuth } from '@/context/AuthContext';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import emailjs from '@emailjs/browser';
+
+// EmailJS Configuration
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 interface Message {
     _id: string;
@@ -24,6 +40,13 @@ const MessageList = () => {
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    // Reply Modal State
+    const [isReplyOpen, setIsReplyOpen] = useState(false);
+    const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+    const [replySubject, setReplySubject] = useState('');
+    const [replyBody, setReplyBody] = useState('');
+    const [sending, setSending] = useState(false);
 
     useEffect(() => {
         if (user && !user.isAdmin) {
@@ -72,14 +95,71 @@ const MessageList = () => {
         } catch (error) {
             toast.error('Failed to update message status');
         }
-    }
+    };
+
+    const openReplyModal = (msg: Message) => {
+        setSelectedMessage(msg);
+        setReplySubject(`Re: ${msg.subject}`);
+        setReplyBody(`Dear ${msg.name},\n\nThank you for reaching out to BookHaven.\n\nWith regards,\nBookHaven Support Team`);
+        setIsReplyOpen(true);
+    };
+
+    const handleSendReply = async () => {
+        if (!selectedMessage || !replyBody) return;
+
+        if (!EMAILJS_SERVICE_ID || !EMAILJS_PUBLIC_KEY) {
+            toast.error("EmailJS configuration missing");
+            return;
+        }
+
+        setSending(true);
+
+        try {
+            // Construct Email Logic
+            const htmlContent = `
+                <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; color: #333;">
+                    <p>${replyBody.replace(/\n/g, '<br/>')}</p>
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;" />
+                    <p style="font-size: 12px; color: #888;">
+                        <strong>Original Message from ${selectedMessage.name}:</strong><br/>
+                        ${selectedMessage.message}
+                    </p>
+                </div>
+            `;
+
+            await emailjs.send(
+                EMAILJS_SERVICE_ID,
+                EMAILJS_TEMPLATE_ID,
+                {
+                    to_email: selectedMessage.email,
+                    subject: replySubject,
+                    html_content: htmlContent,
+                },
+                EMAILJS_PUBLIC_KEY
+            );
+
+            toast.success(`Reply sent to ${selectedMessage.email}`);
+            setIsReplyOpen(false);
+
+            // Optionally mark as read
+            if (!selectedMessage.isRead) {
+                markAsRead(selectedMessage._id);
+            }
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to send reply");
+        } finally {
+            setSending(false);
+        }
+    };
 
     return (
-        <Layout>
+        <AdminLayout>
             <Helmet>
                 <title>Messages | Admin BookHaven</title>
             </Helmet>
-            <div className="container mx-auto px-4 py-8">
+            <div className="w-full">
                 <h1 className="text-3xl font-bold font-serif mb-8 flex items-center gap-3">
                     <MessageSquare className="h-8 w-8 text-primary" />
                     User Messages
@@ -129,10 +209,10 @@ const MessageList = () => {
                                                         <CheckCircle className="h-4 w-4 text-green-600" />
                                                     </Button>
                                                 )}
-                                                <Button variant="ghost" size="icon" onClick={() => window.location.href = `mailto:${msg.email}`}>
+                                                <Button variant="ghost" size="icon" onClick={() => openReplyModal(msg)} title="Reply">
                                                     <Mail className="h-4 w-4 text-blue-600" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(msg._id)}>
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(msg._id)} title="Delete">
                                                     <Trash2 className="h-4 w-4 text-destructive" />
                                                 </Button>
                                             </div>
@@ -149,7 +229,42 @@ const MessageList = () => {
                     </div>
                 )}
             </div>
-        </Layout>
+
+            {/* Reply Modal */}
+            <Dialog open={isReplyOpen} onOpenChange={setIsReplyOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>Reply to {selectedMessage?.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="subject">Subject</Label>
+                            <Input
+                                id="subject"
+                                value={replySubject}
+                                onChange={(e) => setReplySubject(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="message">Message</Label>
+                            <Textarea
+                                id="message"
+                                value={replyBody}
+                                onChange={(e) => setReplyBody(e.target.value)}
+                                className="min-h-[150px]"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsReplyOpen(false)} disabled={sending}>Cancel</Button>
+                        <Button onClick={handleSendReply} disabled={sending} className="gap-2">
+                            {sending ? 'Sending...' : 'Send Reply'}
+                            {!sending && <Send className="h-4 w-4" />}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </AdminLayout>
     );
 };
 

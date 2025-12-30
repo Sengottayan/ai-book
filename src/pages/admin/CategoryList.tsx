@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'sonner';
 import { Plus, Trash2, ChevronLeft, Loader2 } from 'lucide-react';
-import Layout from '@/components/layout/Layout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/context/AuthContext';
@@ -88,11 +88,11 @@ const CategoryList = () => {
     };
 
     return (
-        <Layout>
+        <AdminLayout>
             <Helmet>
                 <title>Categories | Admin</title>
             </Helmet>
-            <div className="container mx-auto px-4 py-8">
+            <div className="w-full">
                 <div className="flex justify-between items-center mb-6">
                     <Link to="/admin/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
                         <ChevronLeft className="h-4 w-4" /> Back to Dashboard
@@ -156,7 +156,7 @@ const CategoryList = () => {
                     </div>
                 )}
             </div>
-        </Layout>
+        </AdminLayout>
     );
 };
 

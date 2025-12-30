@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, Users, Shield, ShieldAlert, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/axios';
-import Layout from '@/components/layout/Layout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { useAuth } from '@/context/AuthContext';
 
 interface User {
@@ -79,11 +79,11 @@ const UserList = () => {
     // If you need "Make Admin" feature, we can add it.
 
     return (
-        <Layout>
+        <AdminLayout>
             <Helmet>
                 <title>Users | Admin BookHaven</title>
             </Helmet>
-            <div className="container mx-auto px-4 py-8">
+            <div className="w-full">
                 <h1 className="text-3xl font-bold font-serif mb-8 flex items-center gap-3">
                     <Users className="h-8 w-8 text-primary" />
                     Users & Admins
@@ -149,7 +149,7 @@ const UserList = () => {
                     </div>
                 )}
             </div>
-        </Layout>
+        </AdminLayout>
     );
 };
 

@@ -29,6 +29,7 @@ import Contact from "./pages/Contact";
 import MessageList from "./pages/admin/MessageList";
 import UserList from "./pages/admin/UserList";
 import CategoryList from "./pages/admin/CategoryList";
+import Newsletter from "./pages/admin/Newsletter";
 import About from "./pages/About";
 import FAQs from "./pages/FAQs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -67,6 +68,7 @@ const App = () => (
                   <Route path="/admin/messagelist" element={<MessageList />} />
                   <Route path="/admin/userlist" element={<UserList />} />
                   <Route path="/admin/categorylist" element={<CategoryList />} />
+                  <Route path="/admin/newsletter" element={<Newsletter />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/about" element={<About />} />

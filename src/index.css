@@ -127,6 +127,12 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
+  /* Hide default eye icon in Edge/IE/Chrome */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
   }

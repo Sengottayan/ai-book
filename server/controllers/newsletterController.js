@@ -62,4 +62,46 @@ const subscribeToNewsletter = asyncHandler(async (req, res) => {
     }
 });
 
-export { subscribeToNewsletter };
+// @desc    Send newsletter to all subscribers (Admin)
+// @route   POST /api/newsletter/send
+// @access  Private/Admin
+const sendNewsletter = asyncHandler(async (req, res) => {
+    const { subject, message } = req.body;
+
+    if (!subject || !message) {
+        res.status(400);
+        throw new Error('Please provide subject and message');
+    }
+
+    const subscribers = await Newsletter.find({});
+
+    if (subscribers.length === 0) {
+        res.status(400);
+        throw new Error('No subscribers found');
+    }
+
+    // Send emails (using loop or Promise.all - being careful with limits)
+    // For large scale, use a queue. For now, Promise.all/loop is fine for small scale.
+    let successCount = 0;
+
+    // Using a simple loop to avoid overwhelming the email provider synchronously
+    for (const subscriber of subscribers) {
+        try {
+            await sendEmail({
+                to: subscriber.email,
+                subject: subject,
+                html: message // Expecting full HTML or wrapped text
+            });
+            successCount++;
+        } catch (error) {
+            console.error(`Failed to send to ${subscriber.email}:`, error);
+        }
+    }
+
+    res.json({
+        success: true,
+        message: `Newsletter sent to ${successCount} of ${subscribers.length} subscribers`
+    });
+});
+
+export { subscribeToNewsletter, sendNewsletter };

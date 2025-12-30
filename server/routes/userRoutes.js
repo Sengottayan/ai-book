@@ -1,11 +1,12 @@
 import express from 'express';
 const router = express.Router();
-import { authUser, registerUser, getUserProfile, updateUserProfile, getWishlist, addToWishlist, removeFromWishlist, forgotPassword, resetPassword, getUsers, deleteUser, getUserById, updateUser } from '../controllers/userController.js';
+import { authUser, registerUser, getUserProfile, updateUserProfile, getWishlist, addToWishlist, removeFromWishlist, forgotPassword, resetPassword, getUsers, deleteUser, getUserById, updateUser, checkUserExists } from '../controllers/userController.js';
 
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 router.post('/login', authUser);
 router.post('/', registerUser);
+router.post('/check-email', checkUserExists);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resetToken', resetPassword);
 router.route('/profile').get(protect, getUserProfile).put(protect, updateUserProfile);
